@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YiYi World</title>
+    <style>
+        :root { 
+            --bg-color: #FFF9EB; 
+            --primary: #F6AE2D; 
+            --text-main: #5C4A3D; 
+            --text-sub: #9A8B80; 
+            --card-bg: #FFFFFF;
+            --tag-bg: #FFEFEF;
+            --tag-text: #E86A58; 
+            --shadow: 0 6px 16px rgba(200, 180, 150, 0.15);
+            --period-pink: #FFE4E1;
+            --period-deep: #FF6B6B;
+            --class-blue: #E8F1FF;
+            --class-text: #4A90E2;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; }
+        
+        .header { padding: 25px 20px 15px; background: linear-gradient(180deg, #FFF2D4 0%, #FFF9EB 100%); border-radius: 0 0 30px 30px; }
+        .header-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .date-badge { font-size: 14px; background: #FFFFFF; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: var(--primary); font-weight: bold;}
+        .quote { font-size: 13px; color: var(--text-sub); line-height: 1.5; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 12px; margin-top: 10px; display: inline-block; border: 1px dashed #E8DCC8;}
+
+        /* 今日课表框 */
+        .class-card {
+            margin: 15px 20px 0;
+            background: var(--class-blue);
+            border-radius: 16px;
+            padding: 12px 15px;
+            border-left: 5px solid var(--class-text);
+        }
+        .class-title { font-size: 14px; font-weight: bold; color: var(--class-text); margin-bottom: 6px; display: flex; align-items: center; }
+        .class-desc { font-size: 13px; color: #333; line-height: 1.6; }
+
+        .health-card {
+            margin: 10px 20px 0;
+            background: var(--period-pink);
+            border-radius: 16px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #FFD1CC;
+        }
+        .health-card.alert { background: #FFD1CC; border-color: var(--period-deep); animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+        .health-text { display: flex; flex-direction: column; }
+        .health-title { font-size: 14px; font-weight: bold; color: #D35400; }
+        .health-desc { font-size: 12px; color: #C0392B; }
+        .health-btn { background: white; color: var(--period-deep); border: none; padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .section-title { padding: 15px 20px 10px; font-size: 15px; font-weight: bold; color: var(--text-main); display: flex; align-items: center;}
+        .section-title span { margin-right: 6px; font-size: 18px;}
+        
+        .task-list { padding: 0 20px; }
+        .task-card { background: var(--card-bg); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); transition: all 0.2s ease; border: 2px solid transparent; position: relative; }
+        .task-card:active { transform: scale(0.97); }
+        .task-card.done { opacity: 0.6; background: #F7F3EA; border: 2px dashed #E0D6C8; box-shadow: none; }
+        .task-card.done .task-title { text-decoration: line-through; color: var(--text-sub); }
+        
+        .task-flow { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; display: flex; justify-content: space-between;}
+        .countdown { color: #E86A58; font-weight: bold; }
+        .task-title { font-size: 17px; font-weight: bold; margin-bottom: 10px; line-height: 1.4; }
+        .task-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .min-tag { background: var(--tag-bg); color: var(--tag-text); padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; display: inline-block;}
+        
+        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #FFFFFF; display: flex; border-radius: 30px; padding: 12px 0; box-shadow: 0 8px 24px rgba(180, 160, 140, 0.2); z-index: 10; }
+        .nav-item { flex: 1; text-align: center; color: #C4B8AC; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center;}
+        .nav-item span { font-size: 20px; margin-bottom: 2px; opacity: 0.5; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active span { opacity: 1; }
+        
+        .btn-add { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border: none; border-radius: 50%; font-size: 28px; display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 16px rgba(246, 174, 45, 0.4); z-index: 10; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(92, 74, 61, 0.4); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-content { background: #FFFFFF; padding: 25px 20px; border-radius: 24px; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modal-content h3 { margin-bottom: 15px; color: var(--text-main); font-size: 18px; text-align: center; }
+        .modal-content input { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 2px solid #F0E6D8; border-radius: 12px; font-size: 14px; outline: none; }
+        .modal-btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-btn-group button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-cancel { background: #F0E6D8; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-title">
+            <span>✨ 吴怡的管家</span>
+            <span class="date-badge" id="date-text">10月23日</span>
+        </div>
+        <div class="quote" id="quote-text">进门不要坐，背包放下就去洗澡。</div>
+    </div>
+
+    <!-- 今日课表概览 -->
+    <div class="class-card">
+        <div class="class-title">📚 今日课程概览</div>
+        <div class="class-desc" id="class-desc">加载中...</div>
+    </div>
+
+    <!-- 生理期 -->
+    <div class="health-card" id="period-card">
+        <div class="health-text">
+            <div class="health-title">🌸 生理期小助手</div>
+            <div class="health-desc" id="period-desc">正在计算...</div>
+        </div>
+        <button class="health-btn" onclick="recordPeriodToday()">今天来了</button>
+    </div>
+
+    <div class="section-title"><span>✅</span>及格线（每天三件事）</div>
+    <div class="task-list" id="daily-must-list"></div>
+
+    <div class="section-title"><span>🎯</span>今日主业（按课表排布）</div>
+    <div class="task-list" id="daily-main-list"></div>
+
+    <div class="section-title"><span>🌟</span>加分项 & 特殊任务</div>
+    <div class="task-list" id="daily-bonus-list"></div>
+
+    <div class="nav-bar">
+        <div class="nav-item active"><span>📖</span>今日</div>
+        <div class="nav-item" onclick="alert('月度台账开发中~')"><span>📅</span>台账</div>
+        <div class="nav-item" onclick="alert('设置页面')"><span>⚙️</span>设置</div>
+    </div>
+
+    <button class="btn-add" onclick="openModal()">✏️</button>
+
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h3>添加加分项 ✨</h3>
+            <input type="text" id="newTaskTitle" placeholder="我想做什么？(如: 听播客)">
+            <input type="text" id="newTaskMin" placeholder="最低底线是？(如: 听10分钟)">
+            <div class="modal-btn-group">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-save" onclick="saveNewTask()">贴上墙</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 根据杭师大真实作息与课表定制的排布 ===
+        const getTodayPlan = () => {
+            const day = new Date().getDay();
+            const plans = {
+                1: { // 周一
+                    classInfo: "上午：1-2节 基础化学 | 6-7节 武术<br>晚上：10-11节 英文护理文献导读", 
+                    flow: "20:25 下课 → 洗澡 → 学 30 分钟", 
+                    main: "化学 1-2 题", min: "1 题", targetTime: "21:20" 
+                },
+                2: { // 周二
+                    classInfo: "上午：1-4节 形态学实验 | 下午：8-9节 大学英语<br>晚自习", 
+                    flow: "晚自习里做解剖，回寝只洗澡", 
+                    main: "解剖回忆", min: "说 2 分钟", targetTime: "20:30" 
+                },
+                3: { // 周三
+                    classInfo: "上午：1-2节 基础化学 | 下午：6-8节 人文修养/思修<br>晚上：10-12节 人工智能/京剧", 
+                    flow: "20:25 下课 → 跑步 → 洗澡 → 学 30 分钟", 
+                    main: "化学 1-2 题", min: "1 题", targetTime: "21:30" 
+                },
+                4: { // 周四
+                    classInfo: "上午：1-4节 导论/形态学 | 下午：6-9节 形态学理论<br>晚上：10-12节 新中国史(线上)", 
+                    flow: "20:25 下课 → 洗澡 → 学 30 分钟", 
+                    main: "期中作业提纲", min: "写 100 字", targetTime: "21:20" 
+                },
+                5: { // 周五
+                    classInfo: "下午：6-9节 形态学实验<br>晚上完全空出来！", 
+                    flow: "晚上空出来", 
+                    main: "愿望：文游或 vlog", min: "30 分钟", targetTime: "20:00" 
+                },
+                6: { // 周六
+                    classInfo: "周末双休", 
+                    flow: "白天两小时愿望，下午补漏", 
+                    main: "休息也算完成", min: "好好休息", targetTime: "10:00" 
+                },
+                0: { // 周日
+                    classInfo: "晚自习", 
+                    flow: "晚自习里做解剖，回寝只洗澡", 
+                    main: "解剖回忆", min: "说 2 分钟", targetTime: "20:30" 
+                }
+            };
+            return plans[day] || plans[1];
+        };
+
+        const quotes = [
+            "进门别坐下，先去洗澡！",
+            "断一天不算断，从最小版重新开始。",
+            "每天只定一件必做的事，其余都算加分。",
+            "23:30 躺下，决定了明天一半的气色。",
+            "能重新开始的人，比一次都没断的人走得远。",
+            "计划不是用来完成的，是用来失败之后重新开始的。"
+        ];
+
+        // 本地存储的键名换成 wuyiSchedule
+        let tasks = JSON.parse(localStorage.getItem('wuyiSchedule')) || {
+            must: [
+                { id: 'm1', flow: "关机仪式", title: "23:30 躺下，手机放桌上", min: "不看手机", time: "23:30", target: "23:30", done: false },
+                { id: 'm2', flow: "体态纠正", title: "体态 3 分钟", min: "靠墙站 1 分钟", time: "睡前", target: "23:20", done: false }
+            ],
+            main: [],
+            bonus: [
+                { id: 'b1', flow: "10.25体测倒计时", title: "坐位体前屈练习", min: "拉伸 3组×3轮", time: "近期", target: "20:00", done: false },
+                { id: 'b2', flow: "10.25体测倒计时", title: "立定跳远(摆臂+45度)", min: "跳 8 次", time: "近期", target: "20:00", done: false },
+                { id: 'b3', flow: "气色加分", title: "午饭/晚饭加一份蛋白质", min: "吃块豆腐/鸡肉", time: "吃饭时", target: "12:00", done: false }
+            ]
+        };
+
+        function init() {
+            const plan = getTodayPlan();
+            const today = new Date();
+            
+            document.getElementById('date-text').innerText = `${today.getMonth()+1}月${today.getDate()}日`;
+            document.getElementById('quote-text').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('class-desc').innerHTML = plan.classInfo;
+
+            const todayStr = today.toDateString();
+            const lastOpenDate = localStorage.getItem('lastOpenDate');
+            
+            // 每天重置主任务与及格线
+            if (tasks.main.length === 0 || lastOpenDate !== todayStr) {
+                tasks.main = [
+                    { id: 'main1', flow: plan.flow, title: plan.main, min: plan.min, time: "晚上", target: plan.targetTime, done: false }
+                ];
+                if (lastOpenDate && lastOpenDate !== todayStr) {
+                    tasks.must.forEach(t => t.done = false); // 及格线每天重置
+                }
+                localStorage.setItem('lastOpenDate', todayStr);
+                saveData();
+            }
+            
+            updatePeriodStatus();
+            renderAll();
+            startClock(); 
+        }
+
+        function renderAll() {
+            renderList('daily-must-list', tasks.must);
+            renderList('daily-main-list', tasks.main);
+            renderList('daily-bonus-list', tasks.bonus);
+        }
+
+        function renderList(containerId, listData) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            listData.forEach(task => {
+                const card = document.createElement('div');
+                card.className = `task-card ${task.done ? 'done' : ''}`;
+                card.id = 'card-' + task.id;
+                card.onclick = () => toggleTask(containerId, task.id);
+                const checkIcon = task.done ? ' <span style="color:#34C759">✔</span>' : '';
+                card.innerHTML = `
+                    <div class="task-flow">
+                        <span>🕒 ${task.time} · ${task.flow}</span>
+                        ${task.target ? `<span class="countdown" id="cd-${task.id}"></span>` : ''}
+                    </div>
+                    <div class="task-title">${task.title}${checkIcon}</div>
+                    <div class="task-bottom">
+                        <span class="min-tag">🌱 底线：${task.min}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTask(listType, id) {
+            let key = listType === 'daily-must-list' ? 'must' : (listType === 'daily-main-list' ? 'main' : 'bonus');
+            tasks[key] = tasks[key].map(t => t.id === id ? { ...t, done: !t.done } : t);
+            saveData();
+            renderAll();
+        }
+
+        let alertedTasks = new Set(); 
+
+        function startClock() {
+            setInterval(() => {
+                const now = new Date();
+                const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                let allTasks = [...tasks.must, ...tasks.main, ...tasks.bonus];
+                
+                allTasks.forEach(task => {
+                    if (task.target && !task.done && !alertedTasks.has(task.id)) {
+                        const cdEl = document.getElementById('cd-' + task.id);
+                        const targetParts = task.target.split(':');
+                        const targetDate = new Date();
+                        targetDate.setHours(parseInt(targetParts[0]), parseInt(targetParts[1]), 0, 0);
+                        let diffMins = Math.floor((targetDate - now) / 60000);
+
+                        if (cdEl) {
+                            if (diffMins > 0) {
+                                cdEl.innerText = `还有 ${diffMins} 分钟`;
+                            } else if (diffMins > -30) { 
+                                cdEl.innerText = `已到时间！请完成`;
+                            }
+                        }
+
+                        // 到点提醒
+                        if (currentTime === task.target) {
+                            if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+                            alert(`⏰ 叮咚！时间到了！\n\n该去做：【${task.title}】了。\n哪怕只做【${task.min}】也算赢！\n\n吴怡，进门别坐下，先去洗澡！`);
+                            alertedTasks.add(task.id); 
+                        }
+                    }
+                });
+            }, 10000); // 每10秒检查一次
+        }
+
+        function updatePeriodStatus() {
+            let lastPeriodStr = localStorage.getItem('lastPeriodDate');
+            const today = new Date(); today.setHours(0,0,0,0);
+            if (!lastPeriodStr) {
+                document.getElementById('period-desc').innerText = "点击右侧按钮，记录今天";
+                return;
+            }
+            const lastPeriod = new Date(lastPeriodStr);
+            const nextPeriod = new Date(lastPeriod); nextPeriod.setDate(nextPeriod.getDate() + 28);
+            const diffDays = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24));
+            const card = document.getElementById('period-card');
+            const desc = document.getElementById('period-desc');
+
+            if (diffDays < 0) { desc.innerText = `已推迟 ${Math.abs(diffDays)} 天，注意保暖！`; card.classList.add('alert'); }
+            else if (diffDays === 0) { desc.innerText = `预计就是今天！准备好~`; card.classList.add('alert'); }
+            else if (diffDays <= 3) { desc.innerText = `还有 ${diffDays} 天，注意保暖！`; card.classList.add('alert'); }
+            else { desc.innerText = `距离下次大约还有 ${diffDays} 天`; card.classList.remove('alert'); }
+        }
+
+        function recordPeriodToday() {
+            if (confirm("确定要记录今天来了大姨妈吗？")) {
+                localStorage.setItem('lastPeriodDate', new Date().toISOString().split('T')[0]);
+                updatePeriodStatus();
+                alert("已记录！这期间多喝热水，不要练腹部力量哦~");
+            }
+        }
+
+        function openModal() { document.getElementById('taskModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
+        function saveNewTask() {
+            const title = document.getElementById('newTaskTitle').value;
+            const min = document.getElementById('newTaskMin').value || "完成即可";
+            if (!title) return alert("你想做点什么呢？");
+            tasks.bonus.push({ id: Date.now().toString(), time: "自定义", flow: "加分项", title: title, min: min, target: "", done: false });
+            closeModal();
+            saveData();
+            renderAll();
+        }
+
+        function saveData() { localStorage.setItem('wuyiSchedule', JSON.stringify(tasks)); }
+        init();
+    </script>
+</body>
+</html>
